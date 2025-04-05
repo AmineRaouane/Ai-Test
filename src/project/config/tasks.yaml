@@ -1,0 +1,11 @@
+classification_task:
+  description: >
+    Analyze the email below .
+    Email:
+    {email}
+  expected_output: >
+    state : the classification of the email spam or not spam (Urgent or Not Urgent).
+    explanation : a brief explanation of why the email is classified as spam or not spam.
+    response : in case the email is not spam, provide a potential response to the email.
+  agent: classifier
+  # output_file: output/report.md
