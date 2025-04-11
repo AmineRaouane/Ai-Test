@@ -1,26 +1,30 @@
 from crewai.tools import BaseTool
 from typing import Type
 from pydantic import BaseModel, Field
-from transformers import pipeline
-import torch
-
+import requests
+import os
 class Email(BaseModel):
     """Input schema for MyCustomTool."""
-    email: str = Field(..., description="The email to classify.")
+    url: str = Field(..., description="The url to classify.")
 
-class EmailClassifier(BaseTool):
-    name: str = "EmailClassifier"
+class UrlTester(BaseTool):
+    name: str = "UrlTester"
     description: str = (
-        "This tool classifies an email as spam,or not spam."
-        " It uses a pre-trained model to perform the classification."
-        " The input should be a string containing the email text."
-        " The output will be a dictionary with the classification label 1 for spam and 0 for not spam. and a score from 0 to 1 indicating the confidence of the classification."
+        "This tool classifies a given url as malicious or not. "
+        "It uses the Malicious Scanner API to check the url. "
+        "The API returns a JSON response with the classification result. "
+        "The tool requires the url to be passed as an argument. "
+        "The url should be a valid URL format. "
     )
     args_schema: Type[BaseModel] = Email
 
-    def _run(self, email: str) -> str:
+    def _run(self, url: str) -> str:
         # Implementation goes here
-        pipe = pipeline(task="text-classification", model="mrm8488/bert-tiny-finetuned-sms-spam-detection")
-        result = pipe(email)
-        print(result)
-        return result
+        base_url = "https://malicious-scanner.p.rapidapi.com/rapid/url"
+        headers = {
+            "x-rapidapi-key": os.getenv("RAPIDAPI_KEY"),
+            "x-rapidapi-host": "malicious-scanner.p.rapidapi.com"
+        }
+        querystring = {"url":url}
+        response = requests.get(base_url, headers=headers, params=querystring)
+        return response.json()

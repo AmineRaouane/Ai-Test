@@ -1,18 +1,19 @@
 from crewai import Agent, Crew, Process, Task, LLM
 from crewai.project import CrewBase, agent, crew, task
-from tools.custom_tool import EmailClassifier
-
-# Create an LLM with streaming enabled
-llm = LLM(
-    model="groq/llama-3.3-70b-versatile",
-    api_key="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"
-)
-# If you want to run a snippet of code before or after the crew starts,
-# you can use the @before_kickoff and @after_kickoff decorators
-# https://docs.crewai.com/concepts/crews#example-crew-class-with-decorators
+from tools.custom_tool import UrlTester
+from dotenv import load_dotenv
 from pydantic import BaseModel
 from typing import Literal, Optional
+import os
+from crewai_tools import SerperDevTool
+import agentops
 
+load_dotenv()
+agentops.init()
+
+llm = LLM(
+    model= "groq/llama-3.1-8b-instant" #"groq/llama-3.3-70b-versatile",
+)
 class Result(BaseModel):
     state: Literal["spam", "Urgent", "Not Urgent"]
     explanation: str
@@ -36,7 +37,7 @@ class Project():
             config=self.agents_config['classifier'],
             verbose=True,
             llm=llm,
-            # tools=[EmailClassifier()],
+            tools=[SerperDevTool(), UrlTester()],
         )
 
     # To learn more about structured task outputs,
